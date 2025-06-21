@@ -7,7 +7,9 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  TablePagination
+  TablePagination,
+  TableSortLabel,
+  Box
 } from '@mui/material';
 
 function TaskList({ selectedProject, refresh }) {
@@ -16,6 +18,8 @@ function TaskList({ selectedProject, refresh }) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalTasks, setTotalTasks] = useState(0);
+  const [orderBy, setOrderBy] = useState('priority');
+  const [order, setOrder] = useState('asc');
 
   useEffect(() => {
     async function fetchTasks() {
@@ -30,7 +34,8 @@ function TaskList({ selectedProject, refresh }) {
         const res = await getTasks(selectedProject, {
           startDate: '2024-01-01',
           endDate: '2025-12-31',
-          sortBy: 'priority',
+          sortBy: orderBy,
+          sortDirection: order,
           page,
           size: rowsPerPage
         });
@@ -46,7 +51,7 @@ function TaskList({ selectedProject, refresh }) {
     }
 
     fetchTasks();
-  }, [refresh, selectedProject, page, rowsPerPage]);
+  }, [refresh, selectedProject, page, rowsPerPage, orderBy, order]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -57,18 +62,40 @@ function TaskList({ selectedProject, refresh }) {
     setPage(0);
   };
 
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
   return loading ? (
     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2em' }}>
       <CircularProgress />
     </div>
   ) : (
-    <>
+    <Box>
       <Table>
         <TableHead>
           <TableRow>
             <TableCell>Name</TableCell>
-            <TableCell>Priority</TableCell>
-            <TableCell>Due Date</TableCell>
+            <TableCell sortDirection={orderBy === 'priority' ? order : false}>
+              <TableSortLabel
+                active={orderBy === 'priority'}
+                direction={orderBy === 'priority' ? order : 'asc'}
+                onClick={() => handleRequestSort('priority')}
+              >
+                Priority
+              </TableSortLabel>
+            </TableCell>
+            <TableCell sortDirection={orderBy === 'dueDate' ? order : false}>
+              <TableSortLabel
+                active={orderBy === 'dueDate'}
+                direction={orderBy === 'dueDate' ? order : 'asc'}
+                onClick={() => handleRequestSort('dueDate')}
+              >
+                Due Date
+              </TableSortLabel>
+            </TableCell>
             <TableCell>Assignee</TableCell>
           </TableRow>
         </TableHead>
@@ -98,7 +125,7 @@ function TaskList({ selectedProject, refresh }) {
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 25, 50]}
       />
-    </>
+    </Box>
   );
 }
 
