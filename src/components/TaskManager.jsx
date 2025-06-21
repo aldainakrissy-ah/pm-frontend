@@ -11,6 +11,19 @@ import {
   Typography
 } from '@mui/material';
 
+/**
+ * TaskManager component provides a project management interface.
+ * 
+ * Features:
+ * - Fetches and displays a list of projects.
+ * - Allows users to select a project from a dropdown.
+ * - Renders a TaskForm for creating new tasks within the selected project.
+ * - Renders a TaskList to display tasks for the selected project.
+ * - Refreshes the task list when a new task is created.
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered TaskManager component.
+ */
 function TaskManager() {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState('');

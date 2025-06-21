@@ -1,3 +1,19 @@
+/**
+ * TaskList Component
+ * ------------------
+ * Displays a list of tasks for a selected project.
+ * Allows filtering by date range, sorting by priority or due date,
+ * and paginating results.
+ *
+ * Props:
+ * - selectedProject: string | number (project ID to filter tasks)
+ * - refresh: boolean (triggers re-fetch of tasks)
+ *
+ * Dependencies:
+ * - @mui/material
+ * - @mui/x-date-pickers
+ * - dayjs
+ */
 import React, { useState, useEffect } from 'react';
 import { getTasks } from '../api/api';
 import {
@@ -92,7 +108,7 @@ function TaskList({ selectedProject, refresh }) {
                     ...params.inputProps,
                     'aria-label': 'Start date',
                   }}
-                  // Ensures keyboard navigation and accessibility
+                
                   inputRef={params.inputRef}
                 />
               )}

@@ -1,3 +1,16 @@
+/**
+ * TaskForm Component
+ * ------------------
+ * Form for creating a new task.
+ * Allows users to enter task details and select a project.
+ *
+ * Props:
+ * - selectedProject: string | number (project ID)
+ * - onTaskCreated: function (callback after task creation)
+ *
+ * Dependencies:
+ * - @mui/material
+ */
 import React, { useState } from 'react';
 import { TextField, Button, MenuItem } from '@mui/material';
 import { createTask } from '../api/api';
