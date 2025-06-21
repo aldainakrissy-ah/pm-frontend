@@ -1,37 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { TextField, Button, MenuItem, Select, FormControl, InputLabel, Box } from '@mui/material';
-import { createTask, getProjects } from '../api/api';
+import React, { useState } from 'react';
+import { TextField, Button, MenuItem } from '@mui/material';
+import { createTask } from '../api/api';
 
-function TaskForm({ onTaskCreated }) {
+function TaskForm({ selectedProject, onTaskCreated }) {
   const [form, setForm] = useState({
     name: '',
     priority: 1,
     dueDate: '',
-    assignee: '',
-    projectId: ''
+    assignee: ''
   });
-
-  const [projects, setProjects] = useState([]);
-
-  useEffect(() => {
-    async function fetchProjects() {
-      try {
-        const res = await getProjects();
-        const projectList = res?.data ?? [];
-        setProjects(projectList);
-
-        // Set default selected project if list is not empty
-        if (projectList.length > 0) {
-          setForm(prev => ({ ...prev, projectId: projectList[0].id }));
-        }
-      } catch {
-        alert('Failed to load projects');
-        setProjects([]);
-      }
-    }
-
-    fetchProjects();
-  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -40,25 +17,29 @@ function TaskForm({ onTaskCreated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createTask(form.projectId, form);
+      const taskData = { ...form, projectId: selectedProject };
+      await createTask(selectedProject, taskData);
       alert('Task created');
       if (onTaskCreated) onTaskCreated();
-    } catch (error) {
+      setForm({ name: '', priority: 1, dueDate: '', assignee: '' }); // Reset form
+    } catch {
       alert('Error creating task');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: '1em', display: 'flex', flexWrap: 'wrap', gap: '1em' }}>
+    <form onSubmit={handleSubmit} style={{ margin: '1em 0', display: 'flex', gap: '1em', flexWrap: 'wrap' }}>
       <TextField
         label="Task Name"
         name="name"
+        value={form.name}
         onChange={handleChange}
         required
       />
       <TextField
         label="Assignee"
         name="assignee"
+        value={form.assignee}
         onChange={handleChange}
         required
       />
@@ -67,10 +48,10 @@ function TaskForm({ onTaskCreated }) {
         name="priority"
         type="number"
         select
-        onChange={handleChange}
         value={form.priority}
+        onChange={handleChange}
       >
-        {[1, 2, 3, 4, 5].map((n) => (
+        {[1, 2, 3, 4, 5].map(n => (
           <MenuItem key={n} value={n}>{n}</MenuItem>
         ))}
       </TextField>
@@ -78,33 +59,14 @@ function TaskForm({ onTaskCreated }) {
         label="Due Date"
         type="date"
         name="dueDate"
+        value={form.dueDate}
         onChange={handleChange}
         InputLabelProps={{ shrink: true }}
       />
-
-      <FormControl>
-        <InputLabel id="project-select-label">Project</InputLabel>
-        <Select
-          labelId="project-select-label"
-          name="projectId"
-          value={form.projectId}
-          onChange={handleChange}
-          required
-          style={{ minWidth: 200 }}
-        >
-          {projects.map(project => (
-            <MenuItem key={project.id} value={project.id}>
-              {project.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
-      <Box display="flex" alignItems="center">
-        <Button type="submit" variant="contained">Create Task</Button>
-      </Box>
+      <Button type="submit" variant="contained">Create Task</Button>
     </form>
   );
 }
 
 export default TaskForm;
+// This component allows users to create a new task for a selected project.
