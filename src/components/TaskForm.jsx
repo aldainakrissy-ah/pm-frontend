@@ -1,15 +1,37 @@
-import React, { useState } from 'react';
-import { TextField, Button, MenuItem } from '@mui/material';
-import { createTask } from '../api/api';
+import React, { useState, useEffect } from 'react';
+import { TextField, Button, MenuItem, Select, FormControl, InputLabel, Box } from '@mui/material';
+import { createTask, getProjects } from '../api/api';
 
-function TaskForm({onTaskCreated}) {
+function TaskForm({ onTaskCreated }) {
   const [form, setForm] = useState({
     name: '',
     priority: 1,
     dueDate: '',
     assignee: '',
-    projectId: 1
+    projectId: ''
   });
+
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const res = await getProjects();
+        const projectList = res?.data ?? [];
+        setProjects(projectList);
+
+        // Set default selected project if list is not empty
+        if (projectList.length > 0) {
+          setForm(prev => ({ ...prev, projectId: projectList[0].id }));
+        }
+      } catch {
+        alert('Failed to load projects');
+        setProjects([]);
+      }
+    }
+
+    fetchProjects();
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,9 +49,19 @@ function TaskForm({onTaskCreated}) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: '1em' }}>
-      <TextField label="Task Name" name="name" onChange={handleChange} required />
-      <TextField label="Assignee" name="assignee" onChange={handleChange} required />
+    <form onSubmit={handleSubmit} style={{ marginBottom: '1em', display: 'flex', flexWrap: 'wrap', gap: '1em' }}>
+      <TextField
+        label="Task Name"
+        name="name"
+        onChange={handleChange}
+        required
+      />
+      <TextField
+        label="Assignee"
+        name="assignee"
+        onChange={handleChange}
+        required
+      />
       <TextField
         label="Priority"
         name="priority"
@@ -38,7 +70,9 @@ function TaskForm({onTaskCreated}) {
         onChange={handleChange}
         value={form.priority}
       >
-        {[1,2,3,4,5].map((n) => <MenuItem key={n} value={n}>{n}</MenuItem>)}
+        {[1, 2, 3, 4, 5].map((n) => (
+          <MenuItem key={n} value={n}>{n}</MenuItem>
+        ))}
       </TextField>
       <TextField
         label="Due Date"
@@ -47,7 +81,28 @@ function TaskForm({onTaskCreated}) {
         onChange={handleChange}
         InputLabelProps={{ shrink: true }}
       />
-      <Button type="submit" variant="contained">Create Task</Button>
+
+      <FormControl>
+        <InputLabel id="project-select-label">Project</InputLabel>
+        <Select
+          labelId="project-select-label"
+          name="projectId"
+          value={form.projectId}
+          onChange={handleChange}
+          required
+          style={{ minWidth: 200 }}
+        >
+          {projects.map(project => (
+            <MenuItem key={project.id} value={project.id}>
+              {project.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <Box display="flex" alignItems="center">
+        <Button type="submit" variant="contained">Create Task</Button>
+      </Box>
     </form>
   );
 }

@@ -7,3 +7,6 @@ export const createTask = (projectId, task) =>
 
 export const getTasks = (projectId, params) =>
   API.get(`/projects/${projectId}/tasks`, { params });
+
+export const getProjects = () =>
+  API.get('/projects');
